@@ -23,6 +23,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
+	"math/rand"
 
 	gettext "github.com/chai2010/gettext-go"
 	"github.com/fatih/camelcase"
@@ -218,6 +219,9 @@ func setWallpaper(desktop, pic, opts, cmd string) {
 		setXfceWallpaper(pic)
 	case "kde4", "plasma5":
 		setPlasmaWallpaper(pic, desktop)
+	case "sway":
+		_, status, err = exec.Exec3("swaymsg", "output", "*", "bg", ""+pic+"", "center")
+		errChk(status, err)
 	case "none":
 	default:
 		// other netWM/EWMH window manager
@@ -378,6 +382,8 @@ func (c *Config) Load(fail bool, context *cli.Context, typ ...string) {
 			c.DefaultCommand = context.String("command")
 		}
 	}
+	rand.Seed(time.Now().Unix())
+	c.BingMarket = markets[rand.Intn(len(markets))]
 	// set default values
 	if len(c.DesktopEnvironment) == 0 {
 		c.DesktopEnvironment = desktopenvironment.Name()
